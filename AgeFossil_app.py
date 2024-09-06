@@ -1,150 +1,86 @@
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.preprocessing import StandardScaler
-from sklearn.cluster import KMeans
-from sklearn.metrics import silhouette_score
 import streamlit as st
+import joblib
+import pandas as pd
+import requests
+from io import BytesIO
 
-page = st.sidebar.selectbox("Pilih Halaman", ["Pendahuluan", "Dashboard"])
+page = st.sidebar.selectbox("Pilih Halaman", ["Pendahuluan", "Perhitungan Prediksi"])
+
+model_url = "https://github.com/sanfla/Age_of_a_Fossil_predict/raw/main/regression.pkl"
+response = requests.get(model_url)
+model = joblib.load(BytesIO(response.content))
 
 if page == "Pendahuluan":
 
-    st.image('https://github.com/sanfla/Customer_Segemtation/blob/main/customer.png?raw=true', use_column_width=True)
+    st.image('https://github.com/sanfla/Age_of_a_Fossil_predict/blob/main/AF_image.png?raw=true', use_column_width=True)
 
     st.title("Pendahuluan")
 
-    data1 = pd.read_csv("https://raw.githubusercontent.com/sanfla/Customer_Segemtation/main/marketing_campaign.csv", delimiter='\t')
-    st.dataframe(data1.head(5))
+    data = pd.read_csv("https://raw.githubusercontent.com/sanfla/Age_of_a_Fossil_predict/main/Age%20_Fossil.csv")
+    st.dataframe(data.head(5))
 
     st.write("""
-    **Customer Personality Analysis** adalah analisis mendetail tentang pelanggan ideal perusahaan. Ini membantu bisnis untuk lebih memahami pelanggan mereka dan memudahkan mereka untuk memodifikasi produk sesuai dengan kebutuhan, perilaku, dan kekhawatiran spesifik dari berbagai jenis pelanggan.
+    Dataset Fosil dibuat untuk memberikan dasar yang komprehensif dan realistis dalam melatih dan mengevaluasi model pembelajaran mesin yang bertujuan 
+    untuk memprediksi usia fosil. Dataset ini memiliki tingkat kesulitan menengah dan mencakup berbagai atribut geologis, kimia, dan fisik yang signifikan 
+    dalam studi pembentukan dan pelestarian fosil.
 
-    Analisis kepribadian pelanggan membantu bisnis untuk memodifikasi produk berdasarkan pelanggan target dari berbagai segmen pelanggan. Misalnya, daripada mengeluarkan uang untuk memasarkan produk baru kepada setiap pelanggan dalam database perusahaan, perusahaan dapat menganalisis segmen pelanggan mana yang paling mungkin membeli produk tersebut dan kemudian memasarkan produk hanya kepada segmen tersebut.
+    Data awalnya bersumber terutama dari PaleoBioDB, dengan tambahan sumber pribadi yang berkontribusi pada dataset. Setelah membuat dataset kecil awal, 
+    model pembelajaran mendalam digunakan untuk memperluas dan menghasilkan versi sintetis. Dataset sintetis ini mensimulasikan skenario yang realistis, 
+    menjadikannya alat yang berharga bagi ilmuwan data dan peneliti di bidang ini.
 
-    ### Fitur
+    **Fitur**
 
-    **People**
-    - **ID**: Identifikasi unik pelanggan
-    - **Year_Birth**: Tahun kelahiran pelanggan
-    - **Education**: Tingkat pendidikan pelanggan
-    - **Marital_Status**: Status pernikahan pelanggan
-    - **Income**: Pendapatan tahunan rumah tangga pelanggan
-    - **Kidhome**: Jumlah anak dalam rumah tangga pelanggan
-    - **Teenhome**: Jumlah remaja dalam rumah tangga pelanggan
-    - **Dt_Customer**: Tanggal pendaftaran pelanggan dengan perusahaan
-    - **Recency**: Jumlah hari sejak pembelian terakhir pelanggan
-    - **Complain**: 1 jika pelanggan mengeluh dalam 2 tahun terakhir, 0 jika tidak
-
-    **Products**
-    - **MntWines**: Jumlah yang dibelanjakan untuk anggur dalam 2 tahun terakhir
-    - **MntFruits**: Jumlah yang dibelanjakan untuk buah dalam 2 tahun terakhir
-    - **MntMeatProducts**: Jumlah yang dibelanjakan untuk produk daging dalam 2 tahun terakhir
-    - **MntFishProducts**: Jumlah yang dibelanjakan untuk produk ikan dalam 2 tahun terakhir
-    - **MntSweetProducts**: Jumlah yang dibelanjakan untuk produk manis dalam 2 tahun terakhir
-    - **MntGoldProds**: Jumlah yang dibelanjakan untuk emas dalam 2 tahun terakhir
-
-    **Promotion**
-    - **NumDealsPurchases**: Jumlah pembelian yang dilakukan dengan diskon
-    - **AcceptedCmp1**: 1 jika pelanggan menerima tawaran dalam kampanye ke-1, 0 jika tidak
-    - **AcceptedCmp2**: 1 jika pelanggan menerima tawaran dalam kampanye ke-2, 0 jika tidak
-    - **AcceptedCmp3**: 1 jika pelanggan menerima tawaran dalam kampanye ke-3, 0 jika tidak
-    - **AcceptedCmp4**: 1 jika pelanggan menerima tawaran dalam kampanye ke-4, 0 jika tidak
-    - **AcceptedCmp5**: 1 jika pelanggan menerima tawaran dalam kampanye ke-5, 0 jika tidak
-    - **Response**: 1 jika pelanggan menerima tawaran dalam kampanye terakhir, 0 jika tidak
-             
-    Data diatas telah diubah menjadi bentuk yang lebih sederhana
+    - **uranium_lead_ratio**: Rasio isotop uranium terhadap timbal dalam sampel fosil.
+    - **carbon_14_ratio**: Rasio isotop karbon-14 yang ada dalam sampel fosil.
+    - **radioactive_decay_series**: Pengukuran seri peluruhan dari isotop induk ke isotop anak.
+    - **stratigraphic_layer_depth**: Kedalaman fosil dalam lapisan stratigrafi, dalam meter.
+    - **isotopic_composition**: Proporsi berbagai isotop dalam sampel fosil.
+    - **fossil_size**: Ukuran fosil, dalam sentimeter.
+    - **fossil_weight**: Berat fosil, dalam gram.
+    - **geological_period**: Periode geologis saat fosil terbentuk.
+    - **surrounding_rock_type**: Jenis batuan yang mengelilingi fosil.
+    - **paleomagnetic_data**: Data orientasi paleomagnetik dari lokasi fosil.
+    - **stratigraphic_position**: Posisi fosil dalam kolom stratigrafi.
+    - **age**: Usia fosil yang dihitung berdasarkan berbagai fitur, dalam tahun.
     """)
-    data2 = pd.read_csv("https://raw.githubusercontent.com/sanfla/Customer_Segemtation/main/data_new.csv")
-    st.dataframe(data2.head(5))
 
 
+elif page == "Perhitungan Prediksi":
 
-elif page == "Dashboard":
+    st.image('https://github.com/sanfla/Age_of_a_Fossil_predict/blob/main/AF_image.png?raw=true', use_column_width=True)
 
-    st.image('https://github.com/sanfla/Customer_Segemtation/blob/main/customer.png?raw=true', use_column_width=True)
+    st.title("Prediksi Usia Fosil Berdasarkan Fitur Geologis")
 
-    st.title("Customer Segment Dashboard")
+    col1, col2, col3 = st.columns(3)
 
-    def hapus_outliers(df, columns):
-        for col in columns:
-            Q1 = df[col].quantile(0.25)
-            Q3 = df[col].quantile(0.75)
-            IQR = Q3 - Q1
-            lower_bound = Q1 - 1.5 * IQR
-            upper_bound = Q3 + 1.5 * IQR
-            df = df[(df[col] >= lower_bound) & (df[col] <= upper_bound)]
-        return df
+    with col1:
+        uranium_lead_ratio = st.number_input('Rasio Uranium-Lead', min_value=0.0, max_value=1.0, value=0.5)
+        carbon_14_ratio = st.number_input('Rasio Carbon-14', min_value=0.0, max_value=1.0, value=0.5)
+        radioactive_decay_series = st.number_input('Seri Peluruhan Radioaktif', min_value=0.0, max_value=2.0, value=1.0)
 
-    def elbow(X, max_cls):
-        wcss = []
-        for k in range(1, max_cls + 1):
-            kmeans = KMeans(n_clusters=k, n_init=10, random_state=42).fit(X)
-            wcss.append(kmeans.inertia_)
-        return wcss
+    with col2:
+        stratigraphic_layer_depth = st.number_input('Kedalaman Lapisan Stratigrafi', min_value=0.0, max_value=500.0, value=100.0)
+        geological_period = st.selectbox('Periode Geologis', ['Cretaceous', 'Cambrian', 'Permian', 'Devonian', 'Jurassic', 'Neogene'])
+        paleomagnetic_data = st.selectbox('Data Paleomagnetik', ['Normal polarity', 'Reversed polarity'])
 
-    def main():
-        data2 = pd.read_csv("https://raw.githubusercontent.com/sanfla/Customer_Segemtation/main/data_new.csv")
+    with col3:    
+        inclusion_of_other_fossils = st.selectbox('Apakah Ada Fosil Lain?', [True, False])
+        stratigraphic_position = st.selectbox('Posisi Stratigrafi', ['Top', 'Middle', 'Bottom'])
+        fossil_size = st.number_input('Ukuran Fosil (cm)', min_value=0.0, max_value=200.0, value=50.0)
 
-        binary = [col for col in data2.columns if data2[col].nunique() == 2]
-        categorical = [col for col in data2.columns if 2 < data2[col].nunique() < 10]
-        numerical = [col for col in data2.select_dtypes(include=['number']).columns 
-                    if col not in binary + categorical]
+    if st.button('Prediksi Umur Fosil'):
+        input_data = pd.DataFrame({
+            'uranium_lead_ratio': [uranium_lead_ratio],
+            'carbon_14_ratio': [carbon_14_ratio],
+            'radioactive_decay_series': [radioactive_decay_series],
+            'stratigraphic_layer_depth': [stratigraphic_layer_depth],
+            'geological_period': [geological_period],
+            'paleomagnetic_data': [paleomagnetic_data],
+            'inclusion_of_other_fossils': [inclusion_of_other_fossils],
+            'stratigraphic_position': [stratigraphic_position],
+            'fossil_size': [fossil_size],
+        })
 
-        data2 = hapus_outliers(data2, numerical)
+        prediction = model.predict(input_data)
 
-        categorical = data2.select_dtypes(include=['object']).columns
-        encoded_data = pd.get_dummies(data2, columns=categorical, drop_first=True, dtype=int)
-
-        scaler = StandardScaler()
-        scaled_data = scaler.fit_transform(encoded_data)
-
-        max_clusters = st.slider('Pilih Maksimum Jumlah Kluster untuk Metode Elbow', min_value=2, max_value=15, value=10)
-        wcss = elbow(scaled_data, max_clusters)
-        plt.figure(figsize=(8, 5))
-        plt.plot(range(1, max_clusters + 1), wcss, marker='o')
-        plt.title('The Elbow Method')
-        plt.xlabel('Number of clusters')
-        plt.ylabel('WCSS')
-        st.pyplot(plt.gcf())
-        plt.close()
-
-        num_clusters = st.slider('Pilih Jumlah Kluster', min_value=2, max_value=15, value=3)
-        
-        kmeans = KMeans(n_clusters=num_clusters, n_init=10, random_state=42)
-        cluster_labels = kmeans.fit_predict(scaled_data)
-        silhouette_avg = silhouette_score(scaled_data, cluster_labels)
-        
-        st.write(f"Silhouette Score for {num_clusters} clusters: {silhouette_avg:.2f}")
-
-        data2['Cluster'] = cluster_labels
-
-        transform_data = scaler.inverse_transform(scaled_data)
-        
-        plt.figure(figsize=(10, 6))
-        colors = sns.color_palette("hsv", num_clusters)
-        for i in range(num_clusters):
-            plt.scatter(transform_data[data2['Cluster'] == i, encoded_data.columns.get_loc('Income')],
-                        transform_data[data2['Cluster'] == i, encoded_data.columns.get_loc('Pengeluaran_2thn')],
-                        s=25, c=colors[i], label=f'Cluster {i+1}')
-        plt.title('Clusters of Customers')
-        plt.xlabel('Income')
-        plt.ylabel('Pengeluaran_2thn')
-        plt.legend()
-        st.pyplot(plt.gcf())
-        plt.close()
-
-        plt.figure(figsize=(10, 6))
-        for i in range(num_clusters):
-            plt.scatter(transform_data[data2['Cluster'] == i, encoded_data.columns.get_loc('umur')],
-                        transform_data[data2['Cluster'] == i, encoded_data.columns.get_loc('Recency')],
-                        s=25, c=colors[i], label=f'Cluster {i+1}')
-        plt.title('Clusters of Customers (Age vs Recency)')
-        plt.xlabel('Age')
-        plt.ylabel('Recency')
-        plt.legend()
-        st.pyplot(plt.gcf())
-        plt.close()
-
-    if __name__ == "__main__":
-        main()
+        st.success(f"Prediksi umur fosil: {prediction[0]:.2f} tahun")
