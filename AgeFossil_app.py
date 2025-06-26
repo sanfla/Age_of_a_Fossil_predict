@@ -6,7 +6,7 @@ from io import BytesIO
 
 page = st.sidebar.selectbox("Pilih Halaman", ["Pendahuluan", "Perhitungan Prediksi"])
 
-model_url = "https://github.com/sanfla/Age_of_a_Fossil_predict/raw/main/regression.pkl"
+model_url = "https://github.com/sanfla/Age_of_a_Fossil_predict/blob/main/regression.pkl"
 response = requests.get(model_url)
 model = joblib.load(BytesIO(response.content))
 
